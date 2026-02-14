@@ -37,32 +37,36 @@ func NewUrlRepo(db *sql.DB) *UrlRepo {
 
 }
 
-func (r *UrlRepo) GetOriginalUrlByShort(_ context.Context, shortURL string) (string, error) {
-	row, err := r.db.Query("SELECT original_url FROM url_table WHERE short_url = $1", shortURL)
-	if err != nil {
-		log.Printf("failed running query: %v", err)
-	}
-	defer row.Close()
+func (r *UrlRepo) GetOriginalUrlByShort(ctx context.Context, shortURL string) (string, error) {
+	var originalURL string
 
-	if !row.Next() {
+	err := r.db.QueryRowContext(ctx, "SELECT original_url FROM url_table WHERE short_url = $1", shortURL).Scan(&originalURL)
+
+	if err == sql.ErrNoRows {
 		return "", errs.ErrNotFound
 	}
+	if err != nil {
+		return "", fmt.Errorf("failed to get original url for short URL %s: %w", shortURL, err)
+	}
 
-	var resultStr string
-	err = row.Scan(&resultStr)
-
-	return resultStr, err
+	return originalURL, nil
 }
 
-func (r *UrlRepo) SaveUrl(_ context.Context, originalURL string, shortURL string) error {
-	_, err := r.db.Exec("INSERT INTO url_table (original_url, short_url) VALUES ($1, $2) ON CONFLICT DO NOTHING", originalURL, shortURL)
-	return err
+func (r *UrlRepo) SaveUrl(ctx context.Context, originalURL string, shortURL string) error {
+	_, err := r.db.ExecContext(
+		ctx, "INSERT INTO url_table (original_url, short_url) VALUES ($1, $2) ON CONFLICT DO NOTHING", originalURL, shortURL)
+	if err != nil {
+		return fmt.Errorf("failed to save url (%s -> %s): %w", originalURL, shortURL, err)
+	}
+
+	return nil
 }
 
 func (r *UrlRepo) GetShortByOriginal(ctx context.Context, originalURL string) (string, error) {
-	var short string
 
-	err := r.db.QueryRow(`SELECT short_url FROM url_table WHERE original_url = $1`, originalURL).Scan(&short)
+	var shortURL string
+
+	err := r.db.QueryRowContext(ctx, "SELECT short_url FROM url_table WHERE original_url = $1", originalURL).Scan(&shortURL)
 
 	if err == sql.ErrNoRows {
 		return "", nil
@@ -71,5 +75,5 @@ func (r *UrlRepo) GetShortByOriginal(ctx context.Context, originalURL string) (s
 		return "", err
 	}
 
-	return short, nil
+	return shortURL, nil
 }
