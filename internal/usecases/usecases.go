@@ -62,20 +62,34 @@ func (u *UrlShortener) GenerateAndSave(ctx context.Context, originalURL string) 
 		return short, nil
 	}
 
-	shortURL, err := u.generateShortURL()
-	if err != nil {
-		return "", err
+	for i := 0; i < 4; i++ {
+
+		shortURL, err := u.generateShortURL()
+		if err != nil {
+			return "", err
+		}
+
+		log.Printf("successfully generated")
+
+		existingOriginal, err := u.repo.GetOriginalUrlByShort(ctx, shortURL)
+		if err != nil && !errors.Is(err, errs.ErrNotFound) {
+			return "", err
+		}
+
+		if existingOriginal == "" {
+			if err = u.repo.SaveUrl(ctx, originalURL, shortURL); err != nil {
+				log.Printf("failed to save url: %v\n", err)
+				return "", err
+			}
+			log.Printf("successfully generated %s", shortURL)
+			return shortURL, nil
+		}
+
+		log.Printf("collision detected for shortURL %s, retrying...", shortURL)
+
 	}
 
-	log.Printf("successfully generated")
-
-	if err = u.repo.SaveUrl(ctx, originalURL, shortURL); err != nil {
-		log.Printf("failed to save url: %v\n", err)
-		return "", err
-	}
-
-	return shortURL, nil
-
+	return "", fmt.Errorf("failed to generate unique short URL after max attempts")
 }
 
 func (u *UrlShortener) GetUrl(ctx context.Context, shortURL string) (string, error) {
