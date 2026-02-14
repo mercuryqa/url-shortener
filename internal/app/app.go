@@ -40,7 +40,7 @@ func (a *App) Start(ctx context.Context) error {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("failed loading .env file")
+		return fmt.Errorf("failed to load .env file: %w", err)
 	}
 
 	storageType := os.Getenv("STORAGE_TYPE")
@@ -59,7 +59,7 @@ func (a *App) Start(ctx context.Context) error {
 
 		dsn := os.Getenv("DB_URI")
 		if dsn == "" {
-			log.Fatal("DB_URI is empty")
+			return fmt.Errorf("DB_URI is not set")
 		}
 
 		db, err := sql.Open("pgx", dsn)
@@ -93,7 +93,7 @@ func (a *App) Start(ctx context.Context) error {
 	go func() {
 		fmt.Println("starting server on port ", httpPort)
 		if err = a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("server error: %v", err)
+			log.Printf("http server failed: %v", err)
 		}
 	}()
 
