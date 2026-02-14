@@ -56,7 +56,7 @@ func (r *UrlRepo) SaveUrl(ctx context.Context, originalURL string, shortURL stri
 	_, err := r.db.ExecContext(
 		ctx, "INSERT INTO url_table (original_url, short_url) VALUES ($1, $2) ON CONFLICT DO NOTHING", originalURL, shortURL)
 	if err != nil {
-		return fmt.Errorf("failed to save url (%s -> %s): %w", originalURL, shortURL, err)
+		return fmt.Errorf("failed to save urls %s,  %s: %w", originalURL, shortURL, err)
 	}
 
 	return nil

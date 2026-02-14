@@ -79,7 +79,7 @@ func (u *UrlShortener) GenerateAndSave(ctx context.Context, originalURL string) 
 				log.Printf("failed to save url: %v\n", err)
 				return "", err
 			}
-			log.Printf("successfully generated %s", shortURL)
+			log.Printf("short url successfully generated")
 			return shortURL, nil
 		}
 
