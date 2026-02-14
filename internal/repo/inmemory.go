@@ -56,7 +56,7 @@ func (r *InMemoryRepo) GetShortByOriginal(_ context.Context, originalURL string)
 
 	shortURL, exists := r.originalToShort[originalURL]
 	if !exists {
-		return "", errs.ErrNotFound
+		return "", nil
 	}
 
 	return shortURL, nil

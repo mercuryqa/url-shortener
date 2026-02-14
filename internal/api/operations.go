@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 	"url/internal/errs"
 )
 
@@ -32,7 +34,20 @@ func (h *Handlers) getUrl(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) generateURL(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	originalURL := r.URL.Query().Get("url")
+	type request struct {
+		URL string `json:"url"`
+	}
+
+	var req request
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid json body", http.StatusBadRequest)
+		log.Printf("invalid json body: %v", err)
+		return
+	}
+	defer r.Body.Close()
+
+	originalURL := strings.TrimSpace(req.URL)
 	if originalURL == "" {
 		http.Error(w, "missing url param", http.StatusBadRequest)
 		log.Printf("empty url param")
@@ -55,9 +70,16 @@ func (h *Handlers) generateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
 
-	if _, err := w.Write([]byte(shortURL)); err != nil {
+	resp := struct {
+		ShortURL string `json:"short_url"`
+	}{
+		ShortURL: shortURL,
+	}
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		log.Printf("failed to write response: %v", err)
 	}
 

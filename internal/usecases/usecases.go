@@ -69,8 +69,6 @@ func (u *UrlShortener) GenerateAndSave(ctx context.Context, originalURL string) 
 			return "", err
 		}
 
-		log.Printf("successfully generated")
-
 		existingOriginal, err := u.repo.GetOriginalUrlByShort(ctx, shortURL)
 		if err != nil && !errors.Is(err, errs.ErrNotFound) {
 			return "", err
