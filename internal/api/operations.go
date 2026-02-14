@@ -27,13 +27,10 @@ func (h *Handlers) getUrl(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, url, http.StatusMovedPermanently)
-
-	// if _, err := w.Write([]byte(url)); err != nil {
-	//	log.Printf("failed to write response: %v", err)
-	// }
 }
 
 func (h *Handlers) generateURL(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	originalURL := r.URL.Query().Get("url")
 	if originalURL == "" {
@@ -42,7 +39,7 @@ func (h *Handlers) generateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortURL, err := h.usecases.GenerateAndSave(originalURL)
+	shortURL, err := h.usecases.GenerateAndSave(ctx, originalURL)
 	if err != nil {
 		log.Printf("error GenerateAndSaveUrl %v\n", err)
 		switch {

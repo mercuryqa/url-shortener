@@ -46,7 +46,7 @@ func (u *UrlShortener) GenerateUrl() (string, error) {
 
 }
 
-func (u *UrlShortener) GenerateAndSave(originalURL string) (string, error) {
+func (u *UrlShortener) GenerateAndSave(ctx context.Context, originalURL string) (string, error) {
 	if !validateUrl(originalURL) {
 		return "", errors.Wrap(errs.ErrBadRequest, "It's not URL")
 	}
@@ -76,9 +76,6 @@ func (u *UrlShortener) GenerateAndSave(originalURL string) (string, error) {
 
 	return shortURL, nil
 
-	// return &model.Url{
-	// 	ShortURL: shortURL,
-	// }, nil
 }
 
 func (u *UrlShortener) GetUrl(ctx context.Context, shortURL string) (string, error) {
