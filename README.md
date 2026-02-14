@@ -1,2 +1,5 @@
-docker-compose up --build# url
-# url
+# url-shortener
+
+docker-compose up --build
+
+
