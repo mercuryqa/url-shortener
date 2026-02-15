@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"url/internal/errs"
 	"url/internal/repo/migrations"
 )
@@ -15,7 +16,6 @@ type UrlRepo struct {
 }
 
 func NewUrlRepo(db *sql.DB) *UrlRepo {
-
 	if db == nil {
 		log.Fatal("db is nil in NewUrlRepo")
 	}
@@ -29,12 +29,11 @@ func NewUrlRepo(db *sql.DB) *UrlRepo {
 	if err := mig.Up(); err != nil {
 		log.Fatalf("failed running migrations: %v", err)
 	}
-	fmt.Println("✅ Migrations applied successfully")
+	log.Println("Migrations applied successfully")
 
 	return &UrlRepo{
 		db: db,
 	}
-
 }
 
 func (r *UrlRepo) GetOriginalUrlByShort(ctx context.Context, shortURL string) (string, error) {
@@ -52,7 +51,7 @@ func (r *UrlRepo) GetOriginalUrlByShort(ctx context.Context, shortURL string) (s
 	return originalURL, nil
 }
 
-func (r *UrlRepo) SaveUrl(ctx context.Context, originalURL string, shortURL string) error {
+func (r *UrlRepo) SaveUrl(ctx context.Context, originalURL, shortURL string) error {
 	_, err := r.db.ExecContext(
 		ctx, "INSERT INTO url_table (original_url, short_url) VALUES ($1, $2) ON CONFLICT DO NOTHING", originalURL, shortURL)
 	if err != nil {
@@ -63,7 +62,6 @@ func (r *UrlRepo) SaveUrl(ctx context.Context, originalURL string, shortURL stri
 }
 
 func (r *UrlRepo) GetShortByOriginal(ctx context.Context, originalURL string) (string, error) {
-
 	var shortURL string
 
 	err := r.db.QueryRowContext(ctx, "SELECT short_url FROM url_table WHERE original_url = $1", originalURL).Scan(&shortURL)

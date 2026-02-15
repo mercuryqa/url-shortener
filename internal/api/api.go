@@ -1,9 +1,9 @@
 package api
 
 import (
-	"url/internal/usecases"
-
 	"github.com/go-chi/chi/v5"
+
+	"url/internal/usecases"
 )
 
 type Handlers struct {

@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/big"
 	"net/url"
-	"time"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +18,7 @@ type RepoUrlShortener interface {
 	GetOriginalUrlByShort(ctx context.Context, shortURL string) (string, error)
 
 	// SaveUrl save short url and original url
-	SaveUrl(ctx context.Context, originalURL string, shortURL string) error
+	SaveUrl(ctx context.Context, originalURL, shortURL string) error
 
 	// GetShortByOriginal check existing short url by original url
 	GetShortByOriginal(ctx context.Context, originalURL string) (string, error)
@@ -36,23 +35,18 @@ func NewUrlShortener(repo RepoUrlShortener) *UrlShortener {
 }
 
 func (u *UrlShortener) GenerateUrl() (string, error) {
-
 	shortURL, err := u.generateShortURL()
 	if err != nil {
 		return "", fmt.Errorf("failed generating short url: %w", err)
 	}
 
 	return shortURL, nil
-
 }
 
 func (u *UrlShortener) GenerateAndSave(ctx context.Context, originalURL string) (string, error) {
 	if !validateUrl(originalURL) {
 		return "", errors.Wrap(errs.ErrBadRequest, "It's not URL")
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 
 	short, err := u.repo.GetShortByOriginal(ctx, originalURL)
 	if err != nil {
@@ -99,13 +93,11 @@ func (u *UrlShortener) GetUrl(ctx context.Context, shortURL string) (string, err
 }
 
 func validateUrl(originalURL string) bool {
-
 	_, err := url.ParseRequestURI(originalURL)
 	return err == nil
 }
 
 func (u *UrlShortener) generateShortURL() (string, error) {
-
 	shortURLLength := 10
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 

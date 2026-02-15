@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
 	"url/internal/errs"
 )
 
@@ -82,5 +83,4 @@ func (h *Handlers) generateURL(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		log.Printf("failed to write response: %v", err)
 	}
-
 }

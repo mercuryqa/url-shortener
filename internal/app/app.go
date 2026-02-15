@@ -34,8 +34,7 @@ func NewApp() *App {
 }
 
 func (a *App) Start(ctx context.Context) error {
-
-	сtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	err := godotenv.Load()
@@ -91,7 +90,7 @@ func (a *App) Start(ctx context.Context) error {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		fmt.Println("starting server on port ", httpPort)
+		log.Println("starting server on port ", httpPort)
 		if err = a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("http server failed: %v", err)
 		}
@@ -100,12 +99,11 @@ func (a *App) Start(ctx context.Context) error {
 	<-stop
 	log.Println("shutting down server...")
 
-	if err = a.server.Shutdown(сtx); err != nil {
+	if err = a.server.Shutdown(ctx); err != nil {
 		log.Printf("server shutdown error: %v", err)
 	}
 
 	log.Println("server stopped")
 
 	return nil
-
 }

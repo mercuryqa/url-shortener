@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
 	"url/internal/errs"
 )
 
@@ -32,7 +33,7 @@ func (r *InMemoryRepo) GetOriginalUrlByShort(_ context.Context, shortURL string)
 	return originalURL, nil
 }
 
-func (r *InMemoryRepo) SaveUrl(_ context.Context, originalURL string, shortURL string) error {
+func (r *InMemoryRepo) SaveUrl(_ context.Context, originalURL, shortURL string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -60,5 +61,4 @@ func (r *InMemoryRepo) GetShortByOriginal(_ context.Context, originalURL string)
 	}
 
 	return shortURL, nil
-
 }

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"url/mocks"
-
 	"github.com/stretchr/testify/assert"
+
+	"url/mocks"
 )
 
 func TestGetOriginalUrlByShort(t *testing.T) {
