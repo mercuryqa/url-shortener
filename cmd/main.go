@@ -13,6 +13,6 @@ func main() {
 	application := app.NewApp()
 
 	if err := application.Start(ctx); err != nil {
-		log.Printf("error while starting application")
+		log.Fatalf("error while starting application: %v", err)
 	}
 }

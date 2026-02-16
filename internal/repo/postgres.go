@@ -17,7 +17,7 @@ type UrlRepo struct {
 
 func NewUrlRepo(db *sql.DB) *UrlRepo {
 	if db == nil {
-		log.Fatal("db is nil in NewUrlRepo")
+		panic("db is nil in NewUrlRepo")
 	}
 
 	migrationsDir := os.Getenv("MIGRATION_DIR")
